@@ -64,6 +64,8 @@ void loop() {
 
 		// Send encrypted data over Serial
 		Serial.write(ciphertext, sizeof(ciphertext));
+		// 3. Error handling and logging
+		Serial.println("[INFO] Encrypted data sent.");
 	}
 
 	for (i = 165; i >= 15; i--) {
@@ -89,11 +91,16 @@ void receiveKeyAndIV() {
 		// Wait for the entire key and IV to be received
 	}
 
-	// Read the key and IV
-	for (int i = 0; i < 16; i++) {
-		key[i] = Serial.read();
-	}
-	for (int i = 0; i < 16; i++) {
-		iv[i] = Serial.read();
+	if (Serial.available() >= 32) {
+		// Read the key and IV
+		for (int i = 0; i < 16; i++) {
+			key[i] = Serial.read();
+		}
+		for (int i = 0; i < 16; i++) {
+			iv[i] = Serial.read();
+		}
+		Serial.println("[INFO] Key and IV received successfully.");
+	} else {
+		Serial.println("[ERROR] Failed to receive key and IV.");
 	}
 }

@@ -23,10 +23,17 @@ PFont orcFont;
 void setup() {
 	size (1200, 700); // Screen Resolution
 	smooth();
-	myPort = new Serial(this, "COM7", 9600); // starts the serial communication
-	loadKeyAndIV(); // Load key and IV from file
-	sendKeyAndIV(); // Send key and IV to Arduino
-	myPort.bufferUntil('.'); // reads the data from the serial port up to the character '.'. So actually it reads this: angle,distance.
+	// 3. Error handling and logging
+	try {
+		myPort = new Serial(this, "COM7", 9600); // starts the serial communication
+		loadKeyAndIV();
+		sendKeyAndIV();
+		myPort.bufferUntil('.'); // reads the data from the serial port up to the character '.'. So actually it reads this: angle,distance.
+		println("[INFO] Setup completed successfully.");
+	} catch (Exception e) {
+		println("[ERROR] Failed during setup: " + e.getMessage());
+        e.printStackTrace();
+	}
 }
 void draw() {
 	fill(98, 245, 31);
@@ -44,53 +51,69 @@ void draw() {
 }
 
 void serialEvent(Serial myPort) {
-  try {
-	// 1. Data Transmission Security
-    byte[] ciphertext = myPort.readBytes(16);
-    byte[] plaintext = decrypt(ciphertext, key, iv);
+	// 3. Error handling and logging
+	try {
+		// 1. Data Transmission Security
+		byte[] ciphertext = myPort.readBytes(16);
+		byte[] plaintext = decrypt(ciphertext, key, iv);
 
-    String data = new String(plaintext).trim();
-    String[] parts = data.split(",");
-    if (parts.length == 2) {
-      int angle = Integer.parseInt(parts[0]);
-      int distance = Integer.parseInt(parts[1]);
+		String data = new String(plaintext).trim();
+		String[] parts = data.split(",");
+		if (parts.length == 2) {
+			int angle = Integer.parseInt(parts[0]);
+			int distance = Integer.parseInt(parts[1]);
 
-      // 2. Input validation and Sanitization
-      if (angle >= 15 && angle <= 165 && distance >= 0 && distance <= 400) {
-        iAngle = angle;
-        iDistance = distance;
-      } else {
-        println("Invalid data received: " + data);
-      }
+			// 2. Input validation and Sanitization
+			if (angle >= 15 && angle <= 165 && distance >= 0 && distance <= 400) {
+				iAngle = angle;
+				iDistance = distance;
+				println("[INFO] Valid data received: Angle=" + angle + ", Distance=" + distance);
+			} else {
+				println("[WARN] Invalid data received: " + data);
+			}
+		} else {
+			println("[WARN] Unexpected data format: " + data);
+		}
+	} catch (NumberFormatException e) {
+		println("[ERROR] Number format error: " + e.getMessage());
+	} catch (Exception e) {
+		println("[ERROR] Error in serialEvent: " + e.getMessage());
+		e.printStackTrace();
     }
-  } catch (Exception e) {
-    e.printStackTrace();
-  }
 }
 
 // 1. Data Transmission Security
 void loadKeyAndIV() {
+	// 3. Error handling and logging
 	try {
 		BufferedReader reader = new BufferedReader(new FileReader("key_iv.txt"));
 		key = reader.readLine();
 		iv = reader.readLine();
 		reader.close();
+		println("[INFO] Key and IV loaded successfully.");
 	} catch (IOException e) {
+		println("[ERROR] Error loading key and IV: " + e.getMessage());
 		e.printStackTrace();
-		println("Error reading key and IV from file.");
 	}
 }
 
 // 1. Data Transmission Security
 void sendKeyAndIV() {
-	if (key.length() == 32 && iv.length() == 32) {
-		myPort.write(key + iv + "\n");
-	} else {
-		println("Invalid key or IV length.");
+	// 3. Error handling and logging
+	try {
+		if (key.length() == 32 && iv.length() == 32) {
+			myPort.write(key + iv + "\n");
+			println("[INFO] Key and IV loaded successfully.");
+		} else {
+			println("Invalid key or IV length.");
+		}
+	} catch (Exception e) {
+		println("[ERROR] Error sending key and IV: " + e.getMessage());
+		e.printStackTrace();
 	}
-	}
+}
 
-	byte[] decrypt(byte[] cipherText, String key, String iv) throws Exception {
+byte[] decrypt(byte[] cipherText, String key, String iv) throws Exception {
 	SecretKeySpec secretKey = new SecretKeySpec(key.getBytes(), "AES");
 	IvParameterSpec ivSpec = new IvParameterSpec(iv.getBytes());
 
