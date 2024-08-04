@@ -9,7 +9,7 @@
 #define MAX_DISTANCE 400 // Max distance in cm (adjust as necessary)
 
 long duration;
-int distance ;
+int distance;
 
 Servo myservo;
 
