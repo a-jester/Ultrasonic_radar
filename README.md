@@ -36,7 +36,8 @@ concern include data integrity, unauthorized access, and proper error handling.
 
 ### Security Implementation
 
-1. Data Transmission Security - 
-2. Input Validation and Sanitization - 
-3. Error Handling and Logging -
-4. Secure Coding Practices -
+1. Data Transmission Security - added AES encryption to data.
+2. Input Validation and Sanitization - validated range of movement. 
+3. Error Handling and Logging - added try / catch blocks, and logging.
+4. Secure Coding Practices - formatted the code to the BARR embedded standard 
+using clang-format.
