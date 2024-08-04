@@ -9,7 +9,7 @@
 #define MAX_DISTANCE 400 // Max distance in cm (adjust as necessary)
 
 long duration;
-int distance;
+int  distance;
 
 Servo myservo;
 
@@ -17,27 +17,30 @@ Servo myservo;
 byte key[16];
 byte iv[16];
 
-int calculateDistance()
+int
+calculateDistance ()
 {
-	digitalWrite(trigPin,LOW);
+	digitalWrite(trigPin, LOW);
 	delayMicroseconds(2);
-	digitalWrite(trigPin,HIGH);
+	digitalWrite(trigPin, HIGH);
 	delayMicroseconds(10);
-	digitalWrite(trigPin,LOW);
+	digitalWrite(trigPin, LOW);
 	duration = pulseIn(echoPin, HIGH);
-	distance = duration*0.034/2;
+	distance = duration * 0.034 / 2;
 
 	// 2. Input Validation and Sanitization
-	if (distance < 0 || distance > MAX_DISTANCE) {
+	if (distance < 0 || distance > MAX_DISTANCE)
+	{
 		distance = -1;
 	}
 
 	return distance;
 }
 
-void setup()
+void
+setup ()
 {
-	pinMode(trigPin , OUTPUT);
+	pinMode(trigPin, OUTPUT);
 	pinMode(echoPin, INPUT);
 	myservo.attach(11);
 	Serial.begin(9600);
@@ -45,17 +48,21 @@ void setup()
 	receiveKeyAndIV();
 }
 
-void loop() {
-	int i;
+void
+loop ()
+{
+	int  i;
 	byte plaintext[16], ciphertext[16];
 
-	for (i = 15; i <= 165; i++) {
+	for (i = 15; i <= 165; i++)
+	{
 		myservo.write(i);
 		delay(15);
 		calculateDistance();
 
 		// Prepare plaintext: angle and distance
-		snprintf((char*)plaintext, sizeof(plaintext), "%03d,%03d", i, distance);
+		snprintf(
+			(char *)plaintext, sizeof(plaintext), "%03d,%03d", i, distance);
 
 		// 1. Data Transmission Security
 		aes256.setKey(key, sizeof(key));
@@ -68,13 +75,15 @@ void loop() {
 		Serial.println("[INFO] Encrypted data sent.");
 	}
 
-	for (i = 165; i >= 15; i--) {
+	for (i = 165; i >= 15; i--)
+	{
 		myservo.write(i);
 		delay(15);
 		calculateDistance();
 
 		// Prepare plaintext: angle and distance
-		snprintf((char*)plaintext, sizeof(plaintext), "%03d,%03d", i, distance);
+		snprintf(
+			(char *)plaintext, sizeof(plaintext), "%03d,%03d", i, distance);
 
 		// 1. Data Transmission Security
 		aes256.setKey(key, sizeof(key));
@@ -86,21 +95,29 @@ void loop() {
 	}
 }
 
-void receiveKeyAndIV() {
-	while (Serial.available() < 64) {
+void
+receiveKeyAndIV ()
+{
+	while (Serial.available() < 64)
+	{
 		// Wait for the entire key and IV to be received
 	}
 
-	if (Serial.available() >= 32) {
+	if (Serial.available() >= 32)
+	{
 		// Read the key and IV
-		for (int i = 0; i < 16; i++) {
+		for (int i = 0; i < 16; i++)
+		{
 			key[i] = Serial.read();
 		}
-		for (int i = 0; i < 16; i++) {
+		for (int i = 0; i < 16; i++)
+		{
 			iv[i] = Serial.read();
 		}
 		Serial.println("[INFO] Key and IV received successfully.");
-	} else {
+	}
+	else
+	{
 		Serial.println("[ERROR] Failed to receive key and IV.");
 	}
 }
