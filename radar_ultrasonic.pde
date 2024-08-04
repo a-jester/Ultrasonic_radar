@@ -42,8 +42,9 @@ void draw() {
 	drawObject();
 	drawText();
 }
-void serialEvent (Serial myPort) { // starts reading data from the Serial Port
-	try {
+
+void serialEvent(Serial myPort) {
+  try {
 	// 1. Data Transmission Security
     byte[] ciphertext = myPort.readBytes(16);
     byte[] plaintext = decrypt(ciphertext, key, iv);
@@ -51,8 +52,16 @@ void serialEvent (Serial myPort) { // starts reading data from the Serial Port
     String data = new String(plaintext).trim();
     String[] parts = data.split(",");
     if (parts.length == 2) {
-      iAngle = Integer.parseInt(parts[0]);
-      iDistance = Integer.parseInt(parts[1]);
+      int angle = Integer.parseInt(parts[0]);
+      int distance = Integer.parseInt(parts[1]);
+
+      // 2. Input validation and Sanitization
+      if (angle >= 15 && angle <= 165 && distance >= 0 && distance <= 400) {
+        iAngle = angle;
+        iDistance = distance;
+      } else {
+        println("Invalid data received: " + data);
+      }
     }
   } catch (Exception e) {
     e.printStackTrace();

@@ -6,6 +6,8 @@
 #define trigPin 8
 #define echoPin 9
 
+#define MAX_DISTANCE 400 // Max distance in cm (adjust as necessary)
+
 long duration;
 int distance ;
 
@@ -14,7 +16,6 @@ Servo myservo;
 // 1. Data Transmission Security
 byte key[16];
 byte iv[16];
-
 
 int calculateDistance()
 {
@@ -25,6 +26,12 @@ int calculateDistance()
 	digitalWrite(trigPin,LOW);
 	duration = pulseIn(echoPin, HIGH);
 	distance = duration*0.034/2;
+
+	// 2. Input Validation and Sanitization
+	if (distance < 0 || distance > MAX_DISTANCE) {
+		distance = -1;
+	}
+
 	return distance;
 }
 
